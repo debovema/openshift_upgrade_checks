@@ -6,3 +6,5 @@ openshift_upgrade_checks_api_url: ""
 openshift_upgrade_checks_validate_certs: "no"
 openshift_upgrade_checks_username: ""
 openshift_upgrade_checks_password: ""
+
+pdb_api_version: "policy/v1"

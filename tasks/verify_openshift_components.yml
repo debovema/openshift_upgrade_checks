@@ -62,7 +62,7 @@
 - name: Check that there are no pods with a high restart count
   assert:
     that:
-      - "{{ item | json_query('[].status.containerStatuses[].restartCount') | int }} < 3" #Variable for role can be replaced here
+      - item | json_query('[].status.containerStatuses[].restartCount') | int < 3
     quiet: yes 
   loop: "{{ pod_list_running.resources }}"
   loop_control:
@@ -115,7 +115,7 @@
     - name: Retrieve all the PDBs
       kubernetes.core.k8s_info:
         api_key: "{{ openshift_auth_results.openshift_auth.api_key }}"
-        api_version: "policy/v1beta1" # Careful when it changes
+        api_version: "{{ pdb_api_version }}"
         kind: PodDisruptionBudget
       register: pdbs
 
@@ -130,8 +130,8 @@
     - name: Assert that PDBs are correct
       assert:
         that:
-          - "{{ (item[2] | int > 1) or (item[2] !=  '0%')  }}" # max unavailable minimum to 2
-          - "{{  (item[3] | int != item[4] | int ) and ((item[3] | int < item[4] | int) or (item[3] != '100%')) }}" # min unavailable can not be inferior to expected pods
+          - (item[2] | int > 1) or (item[2] !=  '0%') # max unavailable minimum to 2
+          - (item[3] | int != item[4] | int ) and ((item[3] | int < item[4] | int) or (item[3] != '100%')) # min unavailable can not be inferior to expected pods
         quiet: yes
       loop: "{{ pdbs_convenient }}"
       loop_control:
