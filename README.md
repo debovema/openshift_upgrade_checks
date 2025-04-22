@@ -1,12 +1,12 @@
-openshift_upgrade_checks
+OpenShift upgrade checks
 =========
 
-This role allows you to perform pre-checks on your OpenShift cluster prior launching an upgrade on it. Each checks can be represented by a single task in the role, that can be skipped to avoid redundancy when relaunching the checks.
+This Ansible role allows you to perform pre-checks on your OpenShift cluster prior launching an upgrade on it. Each checks can be represented by a single task in the role, that can be skipped to avoid redundancy when relaunching the checks.
 
 Supported OpenShift versions
 =========
 
-This role is intended to be run on any OpenShift 4.X cluster. OpenShift 3.X is not supported by the role.
+This role is intended to be run on any OpenShift 4.x cluster. OpenShift 3.x is not supported by the role.
 
 Variables required
 ------------
@@ -54,9 +54,31 @@ Role Variables
 Requirements
 ------------
 This role requires the following collection:
- - [Openshift collection](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/openshift) (v2.0.1)
- 
-Be sure to check prerequisites of this collection too (kubernetes python for example).
+ - [Openshift collection](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/openshift) (v4.0.1)
+
+and the following Python packages:
+* kubernetes
+* requests
+* requests-oauthlib
+
+Install these requirements with these commands:
+
+```shell
+pip install -r requirements.txt
+```
+
+```shell
+ansible-galaxy collection install -r requirements.yml
+```
+
+> To install the collections in a Python *venv* `site-packages` directory:
+>
+> ```shell
+> export ANSIBLE_GALAXY_COLLECTIONS_PATH_WARNING=false
+> VENV_SITE_PACKAGES_DIR=$(python3 -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
+>
+> ansible-galaxy collection install -r requirements.yml -p $VENV_SITE_PACKAGES_DIR
+> ```
 
 Conducted checks
 ----------------
