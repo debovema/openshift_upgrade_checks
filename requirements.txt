@@ -1,3 +1,4 @@
+jmespath
 kubernetes
 requests
 requests-oauthlib

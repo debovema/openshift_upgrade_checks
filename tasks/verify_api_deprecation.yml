@@ -1,5 +1,5 @@
 ---
-- name: Check that removed API are not used anymore 
+- name: Check that removed API are not used anymore
   block:
   - name: Fetch APIRequestCounts
     kubernetes.core.k8s_info:
@@ -15,7 +15,7 @@
     vars:
       jmesquery: "[?not_null(status.removedInRelease, ``)]" 
 
-  - name: Create a convenient list of APIRequestCounts of deprecated APIs 
+  - name: Create a convenient list of APIRequestCounts of deprecated APIs
     set_fact:
       #[Name, currentHour.requestCount, last24h.requestCount]
       deprecatedapi_convenient: "{{ deprecatedapi_convenient | default([]) + [[ item | json_query('metadata.name'), item | json_query('status.currentHour.requestCount'), item | json_query('status.requestCount')]] }}"
@@ -23,7 +23,7 @@
     loop_control:
       label: "{{ item.metadata.name }}"
 
-  - name: Check taht APIs that will be removed are not used anymore 
+  - name: Check that APIs that will be removed are not used anymore
     assert:
       that:
         - item[1] | int == 0 # currentHour requestCount must be equal to 0
@@ -35,4 +35,5 @@
     loop: "{{ deprecatedapi_convenient }}"
     loop_control:
       label: "{{ item[0] }}"
+    when: deprecatedapi_convenient is defined
 ...
