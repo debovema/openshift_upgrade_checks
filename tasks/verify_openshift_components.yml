@@ -49,7 +49,7 @@
 - name: Assert that there are no unhealthy pods
   assert:
     that:
-      - "{{ unhealthy_pods.resources | length == 0 }}"
+      - unhealthy_pods.resources | length == 0
 
 - name: Retrieve running pods prior to checking their restart count
   kubernetes.core.k8s_info:
