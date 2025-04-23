@@ -1,7 +1,3 @@
 collections:
   - name: redhat.openshift
     version: 4.0.1
-## use collections block below if running in a disconnected environment
-# collections:
-#  - name: redhat-openshift-4.0.1.tar.gz # get the archive from https://console.redhat.com/ansible/automation-hub/repo/published/redhat/openshift/
-#    type: file
