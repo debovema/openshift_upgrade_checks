@@ -1,0 +1,8 @@
+- name: Test OpenShift upgrade checks role
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+  - vars.yml
+  roles:
+  - role: ../openshift_upgrade_checks

@@ -85,7 +85,7 @@
 
 - name: Retrieve etcd_network_peer_round_trip_time data
   uri:
-    url:  'https://{{ role_prometheus_url[0] }}/api/v1/query?query={{ etcd_network_peer_round_trip_time_query | urlencode }}'
+    url:  'https://{{ role_prometheus_url[0] }}/api/v1/query?query={{ openshift_upgrade_checks_etcd_network_peer_round_trip_time_query | urlencode }}'
     method: GET
     headers:
       Content-Type: application/json
@@ -103,6 +103,6 @@
 
 - name: Assertion etcd_cpu_io_wait
   assert:
-    that: "{{ etcd_network_peer_round_trip_time_ratio | default(0) }} < {{ etcd_network_peer_round_trip_time_min_ratio }}"
+    that: "{{ etcd_network_peer_round_trip_time_ratio | default(0) }} < {{ openshift_upgrade_checks_etcd_network_peer_round_trip_time_min_ratio }}"
     fail_msg: "etcd_network_peer_round_trip_time_ratio: {{ etcd_network_peer_round_trip_time_ratio | default(0) }}"
     success_msg: "etcd_network_peer_round_trip_time_ratio: {{ etcd_network_peer_round_trip_time_ratio | default(0) }}"
