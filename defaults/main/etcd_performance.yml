@@ -15,6 +15,6 @@ openshift_upgrade_checks_etcd_cpu_io_wait_lower_bound: 4
 openshift_upgrade_checks_etcd_cpu_io_wait_query: 'sum_over_time(group(avg by (le)((sum(irate(node_cpu_seconds_total {mode="iowait"} [2m])) without (cpu)) / count(node_cpu_seconds_total) without (cpu) * 100 AND on (instance) label_replace( kube_node_role{role="master"}, "instance", "$1", "node", "(.+)" )) > {{ openshift_upgrade_checks_etcd_cpu_io_wait_lower_bound }})[{{ openshift_upgrade_checks_etcd_check_from }}:]) / sum_over_time(vector(1)[{{ openshift_upgrade_checks_etcd_check_from }}:])'
 
 
-etcd_network_peer_round_trip_time_min_ratio: 0.05
-etcd_network_peer_round_trip_time_lower_bound: 0.3
-etcd_network_peer_round_trip_time_query: 'sum_over_time(count(histogram_quantile(0.99, avg by (le) (irate(etcd_network_peer_round_trip_time_seconds_bucket[5m]))) > {{ etcd_network_peer_round_trip_time_lower_bound }} )[{{ openshift_upgrade_checks_etcd_check_from }}:]) / sum_over_time(vector(1)[{{ openshift_upgrade_checks_etcd_check_from }}:])'
+openshift_upgrade_checks_etcd_network_peer_round_trip_time_min_ratio: 0.05
+openshift_upgrade_checks_etcd_network_peer_round_trip_time_lower_bound: 0.3
+openshift_upgrade_checks_etcd_network_peer_round_trip_time_query: 'sum_over_time(count(histogram_quantile(0.99, avg by (le) (irate(etcd_network_peer_round_trip_time_seconds_bucket[5m]))) > {{ openshift_upgrade_checks_etcd_network_peer_round_trip_time_lower_bound }} )[{{ openshift_upgrade_checks_etcd_check_from }}:]) / sum_over_time(vector(1)[{{ openshift_upgrade_checks_etcd_check_from }}:])'

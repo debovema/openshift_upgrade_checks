@@ -1,59 +1,18 @@
-OpenShift upgrade checks
-=========
+# OpenShift upgrade checks
 
-This Ansible role allows you to perform pre-checks on your OpenShift cluster prior launching an upgrade on it. Each checks can be represented by a single task in the role, that can be skipped to avoid redundancy when relaunching the checks.
+This Ansible role allows you to perform validation checks on your OpenShift cluster before an upgrade. Each check is a single task in the role and can be skipped to avoid redundancy when relaunching the checks.
 
-Supported OpenShift versions
-=========
+Detailed checks documentation can be found in the [`docs/checks.md`](docs/checks.md) file.
+
+## Requirements
+
+### Supported OpenShift versions
 
 This role is intended to be run on any OpenShift 4.x cluster. OpenShift 3.x is not supported by the role.
 
-Variables required
-------------
-This role requires some vars to function properly. You can pass them as extra vars, through a var file or a vault one.
+### Python and Ansible environment
 
-| Variable | Comments | Examples |
-|----------|----------|----------|
-|openshift_upgrade_checks_api_url | Holds the cluster api URL | `https://api.cluster.domain.com:6443`
-|openshift_upgrade_checks_validate_certs | Should the API and Prometheus certs be validated against the system CA ? | `yes/no` 
-|openshift_upgrade_checks_username | Holds the username of the user that will perform the checks | `admin-viewer`
-|openshift_upgrade_checks_password | Holds the password of the user that will perform the checks | `really-long-and-secure-password` 
-
-Example Playbook
-----------------
-
-Create a playbook based on this example, do not forget to fill in the required vars values : 
-```yaml
-- name: Test upgrade role
-  hosts: localhost 
-  vars:
-    openshift_upgrade_checks_api_url: "<YOUR_API_URL>"
-    openshift_upgrade_checks_validate_certs: <yes/no>
-    # We strongly advise to use a vault file to save those vars
-    openshift_upgrade_checks_username: "<username>"
-    openshift_upgrade_checks_password: "<password>"
-  tasks: 
-    - name: Test role 
-      include_role: 
-        name: openshift_upgrade_checks
-```
-
-Run the playbook :
-```
-ansible-playbook main.yml -v 
-```
-
-Role Variables
---------------
-
-| Variable | Default | Comments | Examples |
-|----------|---------|----------|----------|
-|openshift_upgrade_checks_prometheus_alerts| see defaults/prometheus_alerts.yml | This variable holds a list of critical alerts, that can be modified if needed | see defaults/prometheus_alerts.yml
-
-
-Requirements
-------------
-This role requires the following collection:
+This role requires the following Ansible collection:
  - [Openshift collection](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/openshift) (v4.0.1)
 
 and the following Python packages:
@@ -61,17 +20,38 @@ and the following Python packages:
 * requests
 * requests-oauthlib
 
-Install these requirements with these commands:
+#### Python virtual environment (optional)
+
+It is advised to use a Python virtual environment to install Ansible and the requirements:
+
+```shell
+# create a Python virtual environment
+python3 -m venv .venv
+# activate the virtual environment
+source .venv/bin/activate
+
+# install pip and Ansible
+python3 -m pip install --upgrade pip
+python3 -m pip install --upgrade ansible
+```
+
+#### Python packages
+
+Install the Python packages requirements with this command:
 
 ```shell
 pip install -r requirements.txt
 ```
 
+#### Ansible collection
+
+Install the Ansible collection requirement with this command:
+
 ```shell
 ansible-galaxy collection install -r requirements.yml
 ```
 
-> To install the collections in a Python *venv* `site-packages` directory:
+> To keep everything in the Python virtual environment (if using one), install the collection in the *venv* `site-packages` directory:
 >
 > ```shell
 > export ANSIBLE_GALAXY_COLLECTIONS_PATH_WARNING=false
@@ -80,21 +60,64 @@ ansible-galaxy collection install -r requirements.yml
 > ansible-galaxy collection install -r requirements.yml -p $VENV_SITE_PACKAGES_DIR
 > ```
 
-Conducted checks
-----------------
+> In a disconnected environment, use `requirements.offline.yml` file instead of `requirements.yml` and copy the `redhat-openshift-4.0.1.tar.gz` archive in the directory of this repository (file will be Git-ignored).
 
-Detailed checks documentation can be found in the [`docs/checks.md`](docs/checks.md) file.
+## Usage
 
-License
--------
+### Variables
+
+This role requires some variables to function properly. You can pass them as [extra vars, through a variables file](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html) or [a Vault-encrypted variables file](https://docs.ansible.com/ansible/latest/vault_guide/vault_encrypting_content.html#encrypting-files-with-ansible-vault).
+
+The minimal variables required to target a cluster:
+
+| Variable | Comments | Examples |
+|----------|----------|----------|
+|openshift_upgrade_checks_api_url | Holds the cluster api URL | `https://api.cluster.domain.com:6443`
+|openshift_upgrade_checks_validate_certs | Should the API and Prometheus certs be validated against the system CA ? | `true/false`
+|openshift_upgrade_checks_username | Holds the username of the user that will perform the checks | `admin-viewer`
+|openshift_upgrade_checks_password | Holds the password of the user that will perform the checks | `really-long-and-secure-password` 
+
+### Test playbook
+
+A test playbook is included.
+
+Before running the test playbook, create a `vars.yml` with the required variables of this role:
+
+```shell
+cat <<EOF > vars.yml
+openshift_upgrade_checks_api_url: '<OpenShift API URL>'
+openshift_upgrade_checks_validate_certs: false
+openshift_upgrade_checks_username: "<username>"
+openshift_upgrade_checks_password: "<password>"
+EOF
+```
+
+> The `vars.yml` is Git-ignored to avoid leaking credentials
+
+Run the playbook :
+
+```shell
+ansible-playbook -v test.yml
+```
+
+To choose which checks to run, use Ansible tags:
+
+```shell
+ansible-playbook --skip-tags verify_upgrade_path test.yml
+```
+
+> This will skip the `verify_upgrade_path` check (useful if running in a disconnected environment)
+
+## Variables
+
+| Variable | Default | Comments | Examples |
+|----------|---------|----------|----------|
+| openshift_upgrade_checks_api_url | None (mandatory) | Holds the cluster api URL | `https://api.cluster.domain.com:6443`
+| openshift_upgrade_checks_validate_certs | `false` | Should the API and Prometheus certs be validated against the system CA ? | `true/false`
+| openshift_upgrade_checks_username | None (mandatory) | Holds the username of the user that will perform the checks | `admin-viewer`
+| openshift_upgrade_checks_password | None (mandatory) | Holds the password of the user that will perform the checks | `really-long-and-secure-password`
+| openshift_upgrade_checks_prometheus_alerts| see [defaults/main/prometheus_alerts.yml](defaults/main/prometheus_alerts.yml) | This variable holds a list of critical alerts, that can be modified if needed | see [defaults/main/prometheus_alerts.yml](defaults/main/prometheus_alerts.yml)
+
+## License
 
 BSD
-
-TODO
--------
-
-- Get the main.yml out of the role variables.
-- add a no log parameters on tasks
-- sanitize the SSL verification on the uri module
-
-In fact everything should be passed as extra-vars, making the role completely agnostic from the platform on which the prechecks will be launched in, this will really ease an integration with Ansible Tower for example while these tasks are trivials to do.

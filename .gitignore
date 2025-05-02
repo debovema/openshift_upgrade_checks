@@ -1,3 +1,4 @@
+vars.yml
 *.tar.gz
 ./role_upgrade_check/defaults/openshift_credentials.yml
 .venv/
