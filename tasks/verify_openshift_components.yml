@@ -46,10 +46,19 @@
       - status.phase!=Succeeded
   register: unhealthy_pods
 
+- name: Filter non running pods result
+  ansible.builtin.set_fact:
+    unhealthy_pods: "{{ unhealthy_pods.resources | json_query('[].{name: metadata.name, namespace: metadata.namespace, phase: status.phase}') }}"
+
 - name: Assert that there are no unhealthy pods
   assert:
     that:
-      - unhealthy_pods.resources | length == 0
+      - item.phase in ['Running', 'Completed', 'Succeeded'] # this assertion will always fail
+    fail_msg: "The Pod '{{ item.name }}' in namespace '{{ item.namespace }}' has the '{{ item.phase }}' phase"
+#    quiet: true
+  loop: "{{ unhealthy_pods }}"
+  loop_control:
+    label: "{{ item.namespace }}:{{ item.name }}"
 
 - name: Retrieve running pods prior to checking their restart count
   kubernetes.core.k8s_info:
