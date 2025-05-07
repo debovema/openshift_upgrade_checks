@@ -6,7 +6,7 @@
   register: node_list
 
 - name: Assert that nodes healthchecks are passing
-  assert:
+  ansible.builtin.assert:
     that:
       - item | json_query('status.conditions[? type == `MemoryPressure`].status') | first == 'False'
       - item | json_query('status.conditions[? type == `DiskPressure`].status') | first == 'False'
@@ -16,6 +16,7 @@
   with_items: "{{ node_list.resources }}"
   loop_control:
     label: "{{ item.metadata.name }}"
+  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Check cluster operators state
   block:
@@ -26,7 +27,7 @@
       register: cluster_operators
 
     - name: Assert that all cluster operators are available
-      assert:
+      ansible.builtin.assert:
         that:
           - item | json_query('status.conditions[? type == `Available`].status') | first == 'True'
           - item | json_query('status.conditions[? type == `Progressing`].status') | first == 'False'
@@ -35,6 +36,7 @@
       loop: "{{ cluster_operators.resources }}"
       loop_control:
         label: "{{ item.metadata.name }}"
+      ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Retrieve all non running pods (bad state)
   kubernetes.core.k8s_info:
@@ -51,7 +53,7 @@
     unhealthy_pods: "{{ unhealthy_pods.resources | json_query('[].{name: metadata.name, namespace: metadata.namespace, phase: status.phase}') }}"
 
 - name: Assert that there are no unhealthy pods
-  assert:
+  ansible.builtin.assert:
     that:
       - item.phase in ['Running', 'Completed', 'Succeeded'] # this assertion will always fail
     fail_msg: "The Pod '{{ item.name }}' in namespace '{{ item.namespace }}' has the '{{ item.phase }}' phase"
@@ -59,6 +61,7 @@
   loop: "{{ unhealthy_pods }}"
   loop_control:
     label: "{{ item.namespace }}:{{ item.name }}"
+  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Retrieve running pods prior to checking their restart count
   kubernetes.core.k8s_info:
@@ -69,13 +72,14 @@
   register: pod_list_running
 
 - name: Check that there are no pods with a high restart count
-  assert:
+  ansible.builtin.assert:
     that:
       - item | json_query('[].status.containerStatuses[].restartCount') | int < 3
     quiet: yes 
   loop: "{{ pod_list_running.resources }}"
   loop_control:
     label: "{{ item.metadata.name }}"
+  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Retrieve pending CSRs
   kubernetes.core.k8s_info:
@@ -84,13 +88,14 @@
   register: csr
 
 - name: Assert that there are not pending CSRs
-  assert:
+  ansible.builtin.assert:
     that:
       - "'Pending' not in item | json_query('status.conditions[].type')"
     quiet: yes
   loop: "{{ csr.resources }}"
   loop_control:
     label: "{{ item.metadata.name }}"
+  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
         #- name: Test resolving kubernetes service hostname to and from every DNS pod
         #  block:
@@ -137,7 +142,7 @@
         label: "{{ item.metadata.name }}"
 
     - name: Assert that PDBs are correct
-      assert:
+      ansible.builtin.assert:
         that:
           - (item[2] | int > 1) or (item[2] !=  '0%') # max unavailable minimum to 2
           - (item[3] | int != item[4] | int ) and ((item[3] | int < item[4] | int) or (item[3] != '100%')) # min unavailable can not be inferior to expected pods
@@ -145,3 +150,4 @@
       loop: "{{ pdbs_convenient }}"
       loop_control:
         label: "{{ item[0] }}"
+      ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"

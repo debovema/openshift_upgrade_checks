@@ -24,7 +24,7 @@
       label: "{{ item.metadata.name }}"
 
   - name: Check that APIs that will be removed are not used anymore
-    assert:
+    ansible.builtin.assert:
       that:
         - item[1] | int == 0 # currentHour requestCount must be equal to 0
         - item[2] | int == 0 # last24h requestCount must be equal to 0
@@ -35,5 +35,6 @@
     loop: "{{ deprecatedapi_convenient }}"
     loop_control:
       label: "{{ item[0] }}"
+    ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
     when: deprecatedapi_convenient is defined
 ...

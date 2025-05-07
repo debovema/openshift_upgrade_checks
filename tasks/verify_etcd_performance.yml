@@ -31,10 +31,11 @@
   loop: "{{ etcd_backend_commit_duration_data }}"
 
 - name: Assertion etcd_backend_commit_duration
-  assert:
+  ansible.builtin.assert:
     that: "{{ etcd_backend_commit_duration_ratio | default(0) }} < {{ openshift_upgrade_checks_etcd_backend_commit_duration_min_ratio }}"
     fail_msg: "etcd_backend_commit_duration_ratio: {{ etcd_backend_commit_duration_ratio | default(0) }}"
     success_msg: "etcd_backend_commit_duration_ratio: {{ etcd_backend_commit_duration_ratio | default(0) }}"
+  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Retrieve exceed disk_wal_fsync_duration
   uri:
@@ -55,10 +56,11 @@
   loop: "{{ etcd_disk_wal_fsync_duration_data }}"
 
 - name: Assertion etcd_disk_wal_fsync_duration
-  assert:
+  ansible.builtin.assert:
     that: "{{ etcd_disk_wal_fsync_duration_ratio | default(0) }} < {{ openshift_upgrade_checks_etcd_disk_wal_fsync_duration_min_ratio }}"
     fail_msg: "etcd_disk_wal_fsync_duration_ratio: {{ etcd_disk_wal_fsync_duration_ratio | default(0) }}"
     success_msg: "etcd_disk_wal_fsync_duration_ratio: {{ etcd_disk_wal_fsync_duration_ratio | default(0) }}"
+  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Retrieve cpu_io_wait data
   uri:
@@ -79,10 +81,11 @@
   loop: "{{ etcd_cpu_io_wait_data }}"
 
 - name: Assertion etcd_cpu_io_wait
-  assert:
+  ansible.builtin.assert:
     that: "{{ etcd_cpu_io_wait_ratio | default(0) }} < {{ openshift_upgrade_checks_etcd_cpu_io_wait_min_ratio }}"
     fail_msg: "etcd_cpu_io_wait_ratio: {{ etcd_cpu_io_wait_ratio | default(0) }}"
     success_msg: "etcd_cpu_io_wait_ratio: {{ etcd_cpu_io_wait_ratio | default(0) }}"
+  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Retrieve etcd_network_peer_round_trip_time data
   uri:
@@ -103,7 +106,8 @@
   loop: "{{ etcd_network_peer_round_trip_time_data }}"
 
 - name: Assertion etcd_cpu_io_wait
-  assert:
+  ansible.builtin.assert:
     that: "{{ etcd_network_peer_round_trip_time_ratio | default(0) }} < {{ openshift_upgrade_checks_etcd_network_peer_round_trip_time_min_ratio }}"
     fail_msg: "etcd_network_peer_round_trip_time_ratio: {{ etcd_network_peer_round_trip_time_ratio | default(0) }}"
     success_msg: "etcd_network_peer_round_trip_time_ratio: {{ etcd_network_peer_round_trip_time_ratio | default(0) }}"
+  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"

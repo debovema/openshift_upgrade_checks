@@ -5,3 +5,5 @@ openshift_upgrade_checks_channel_version: 4.2.18
 openshift_upgrade_checks_validate_certs: "false"
 
 openshift_upgrade_checks_pdb_api_version: "policy/v1"
+
+openshift_upgrade_checks_ignore_errors: false

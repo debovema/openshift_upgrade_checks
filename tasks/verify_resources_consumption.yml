@@ -35,12 +35,13 @@
     no_log: True
   
   - name: Assert cpu usage is below defined percentage
-    assert:
+    ansible.builtin.assert:
       that: "{{ item[0] | int < openshift_upgrade_checks_cpu_threshold_percentage }}"
       quiet: yes
     loop: "{{ node_list_cpu }}"
     loop_control:
       label: "{{ item[1] }} < {{ openshift_upgrade_checks_cpu_threshold_percentage }}%"
+    ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Verify Node Memory Consumption
   block:
@@ -63,12 +64,13 @@
     no_log: True
   
   - name: Assert memory usage is below defined percentage
-    assert:
+    ansible.builtin.assert:
       that: "{{ item[0] | int < openshift_upgrade_checks_memory_threshold_percentage }}"
       quiet: yes
     loop: "{{ node_list_mem }}"
     loop_control:
       label: "{{ item[1] }} < {{ openshift_upgrade_checks_memory_threshold_percentage }}%"
+    ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Verify Node Disk Consumption
   block:
@@ -91,13 +93,13 @@
     no_log: True
   
   - name: Assert disk usage is below defined percentage
-    assert:
+    ansible.builtin.assert:
       that: "{{ item[0] | int < openshift_upgrade_checks_disk_threshold_percentage }}"
       quiet: yes
     loop: "{{ node_list_disk }}"
     loop_control:
       label: "{{ item[1] }} < {{ openshift_upgrade_checks_disk_threshold_percentage }}%"
-
+    ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Verify that requests are not taking a too much part of node cpus
   block:
@@ -118,12 +120,13 @@
     loop: "{{ payload_requestscpu.json.data.result }}"
 
   - name: Assert that cpu requests compared to available cpu per node is below defined threshold
-    assert:
+    ansible.builtin.assert:
       that: "{{ item[0] | int < openshift_upgrade_checks_requests_overall_cpu_query_threshold }}"
       quiet: yes
     loop: "{{ request_cpu_list }}"
     loop_control:
       label: "{{ item[1] }} < {{ openshift_upgrade_checks_requests_overall_cpu_query_threshold }}%"
+    ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Verify that requests are actually consuming what they should consume
   block:
@@ -144,12 +147,13 @@
     loop: "{{ payload_requestscpucons.json.data.result }}"
 
   - name: Assert that cpu requests are actually consuming what they are reserving
-    assert:
+    ansible.builtin.assert:
       that: "{{ item[0] | int < openshift_upgrade_checks_comsumption_overall_requests_query_threshold }}"
       quiet: yes
     loop: "{{ request_cpucons_list }}"
     loop_control:
       label: "{{ item[1] }} < {{ openshift_upgrade_checks_comsumption_overall_requests_query_threshold }}%"
+    ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - name: Verify that memory requests are below specified treshold
   block:
@@ -170,11 +174,10 @@
     loop: "{{ payload_requestsmem.json.data.result }}"
 
   - name: Assert that mem requests are below the defined treshold
-    assert:
+    ansible.builtin.assert:
       that: "{{ item[0] | int < openshift_upgrade_checks_requests_overall_mem_query_threshold }}"
       quiet: yes
     loop: "{{ request_mem_list }}"
     loop_control:
       label: "{{ item[1] }} < {{ openshift_upgrade_checks_requests_overall_mem_query_threshold }}%"
-
-
+    ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"

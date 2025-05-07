@@ -30,7 +30,7 @@
     role_alerts: "{{ payload | json_query('json.data.alerts') }}"
 
 - name: Check if any alerts from the alert list is present
-  assert:
+  ansible.builtin.assert:
     that: "{{ item[0].labels.alertname != item[1] }}"
     quiet: yes
   with_nested:
@@ -38,7 +38,7 @@
     - "{{ openshift_upgrade_checks_prometheus_alerts }}"
   loop_control:
     label: "{{ item[0].labels.alertname }}"
-  
+  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
 
 - debug:
     msg: "{{ item | json_query('labels.severity') != 'critical' and item | json_query('state') != 'firing' }}"
@@ -47,6 +47,7 @@
     label: "{{ item.labels.alertname }}"
 
 #- name: Check if there are critical firing alerts
-#  assert:
+#  ansible.builtin.assert:
 #    that: "{{ item | json_query('labels.severity') != 'critical' and item | json_query('state') != 'firing' }}"
 #  loop: "{{ role_alerts }}"
+#  ignore_errors: "{{ openshift_upgrade_checks_ignore_errors }}"
