@@ -1,4 +1,6 @@
 vars.yml
+errors.json
+**/__pycache__
 *.tar.gz
 ./role_upgrade_check/defaults/openshift_credentials.yml
 .venv/
